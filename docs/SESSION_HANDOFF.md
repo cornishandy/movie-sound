@@ -3,7 +3,7 @@
 ## State (19 Oct 2026)
 - In daily use for films in Safari: BlackHole 2ch → the bridge page in Chrome → iFi Pro iDSD at 96 kHz.
 - **New in this repo: Follow Chrome.** The bridge plays the Tidal extension's EQ live. It needs the extension's `movie-sound-link.js` (release 1.5.7). Without it, the bridge uses the saved presets in `bridge/chrome-settings.js`, as before.
-- **Tests:** `npm test` (all silent, in Node). `tests/follow-chrome.mjs` is 13/13. The Orion checks are opt-in (`MOVIE_SOUND_LIVE_CHECKS=1`).
+- **Tests:** `npm test` (all silent, in Node). `tests/follow-chrome.mjs` is 14/14. The Orion checks are opt-in (`MOVIE_SOUND_LIVE_CHECKS=1`).
 - **The live copy** runs from `~/Library/Application Support/movie-sound/bridge`, installed by `tools/install.sh`, with `~/.local/bin/movie-audio`. Before the move it ran from a scratch cache folder.
 
 ## How to change it
