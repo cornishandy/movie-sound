@@ -2,7 +2,8 @@
 node_modules/
 *.log
 # Personal: settings extracted from your Chrome profile, and third-party extension code staged from it.
-orion/extracted-settings.json
-orion/staged-extensions/
+orion/extracted-settings*.json
+# The trailing * also catches iCloud's "name 2" duplicates.
+orion/staged-extensions*/
 # Private checks against your own settings (see orion/README.md).
 *.local.mjs
