@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Movie DSP bridge</title>
+  <style>
+    :root {
+      --bg-primary: #121216;
+      --bg-secondary: #18181f;
+      --bg-surface: #1e1e26;
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --accent: #00e5ff;
+      --accent-glow: rgba(0, 229, 255, 0.35);
+      --accent-gradient: linear-gradient(135deg, #00e5ff, #0077ff);
+      --text-main: #ffffff;
+      --text-muted: #9a9aa5;
+      --border-color: rgba(255, 255, 255, 0.08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background:
+        radial-gradient(900px 420px at 10% -10%, rgba(0, 229, 255, 0.08), transparent 55%),
+        var(--bg-primary);
+      color: var(--text-main);
+      font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 28px 22px 40px;
+    }
+    header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-end; }
+    h1 { font-size: 22px; font-weight: 650; letter-spacing: -0.03em; margin: 0; }
+    .chain { color: var(--text-muted); margin: 8px 0 0; max-width: 62ch; }
+    .chain b { color: var(--accent); font-weight: 600; }
+    .panel {
+      margin-top: 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .dyn { grid-template-columns: 1fr 1fr 1fr; }
+    label { display: block; color: var(--text-muted); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; }
+    select, button {
+      width: 100%;
+      background: var(--bg-surface);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font: inherit;
+    }
+    button { cursor: pointer; }
+    button.primary { background: var(--accent-gradient); color: #041316; border: 0; font-weight: 650; }
+    button:disabled { opacity: 0.45; cursor: default; }
+    .row { display: flex; gap: 8px; align-items: center; }
+    .checks { display: flex; flex-wrap: wrap; gap: 14px 18px; margin-top: 12px; color: var(--text-main); }
+    .checks label { text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--text-main); margin: 0; }
+    canvas {
+      width: 100%;
+      height: 160px;
+      background: #0e0e12;
+      border-radius: 10px;
+      display: block;
+    }
+    .meters { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+    .meter {
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .meter span { display: block; color: var(--accent); font-variant-numeric: tabular-nums; font-size: 16px; margin-top: 2px; }
+    #status { min-height: 2.8em; margin: 12px 0 0; color: var(--text-main); }
+    .follow-status { margin: 12px 0 0; font-size: 13px; color: var(--text-main); opacity: 0.8; }
+    body.clap-flash,
+    body.clap-flash main,
+    body.clap-flash .panel,
+    body.clap-flash header,
+    body.clap-flash #status {
+      background: #fff;
+      color: #000;
+    }
+    #latency { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .actions { display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; gap: 8px; margin-top: 12px; }
+    @media (max-width: 720px) {
+      .grid, .meters, .actions { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Movie DSP bridge</h1>
+        <p class="chain">BlackHole in, iFi Pro iDSD out. <b>HPF → 3-band EQ → Auto-Balance / Bass-only Leveler → Loudness Match → Fast / Look-ahead Limiter → Clean / Warm Ceiling</b></p>
+      </div>
+      <div id="latency">AudioContext output latency —</div>
+    </header>
+
+    <section class="panel">
+      <div class="grid">
+        <div>
+          <label for="input-device">Input (BlackHole only)</label>
+          <select id="input-device"></select>
+        </div>
+        <div>
+          <label for="output-device">Output (not BlackHole)</label>
+          <select id="output-device"></select>
+        </div>
+        <div>
+          <label for="preset">Preset</label>
+          <select id="preset"></select>
+        </div>
+        <div class="grid dyn">
+          <div>
+            <label for="dyn-leveler">Leveler</label>
+            <select id="dyn-leveler">
+              <option value="full" selected>Full</option>
+              <option value="slow">Slow</option>
+              <option value="bass">Bass only</option>
+            </select>
+          </div>
+          <div>
+            <label for="dyn-limiter">Limiter</label>
+            <select id="dyn-limiter">
+              <option value="fast" selected>Fast</option>
+              <option value="lookahead">Look-ahead</option>
+            </select>
+          </div>
+          <div>
+            <label for="dyn-ceiling">Ceiling</label>
+            <select id="dyn-ceiling">
+              <option value="clean" selected>Clean</option>
+              <option value="warm">Warm</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="checks">
+        <label><input id="follow-chrome" type="checkbox" checked> Follow Chrome: play the Tidal extension’s EQ as you change it</label>
+        <label><input id="movie-mode" type="checkbox" checked> Movie mode (interactive). Uncheck for music (playback).</label>
+        <label><input id="dyn-match" type="checkbox"> Loudness match</label>
+        <label><input id="mic-override" type="checkbox"> Allow a physical microphone (off by default)</label>
+      </div>
+      <p id="follow-status" class="follow-status">Looking for the Tidal extension in Chrome…</p>
+      <p id="status">Idle. Nothing is captured until you press Start. A physical microphone stays closed unless you turn the override on.</p>
+      <div class="actions">
+        <button id="start" class="primary" type="button" autofocus>Start</button>
+        <button id="stop" type="button">Stop</button>
+        <button id="clap" type="button" disabled>Lip-sync clap</button>
+        <button id="save-levels" type="button" title="Downloads the last 6 minutes of level readings: numbers only, never audio">Save levels</button>
+        <button id="refresh" type="button">Refresh devices</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <label>Spectrum (input grey, output cyan)</label>
+      <canvas id="spectrum" width="840" height="160"></canvas>
+      <div class="meters">
+        <div class="meter">Leveler reduction<span id="meter-leveler">0.0 dB</span></div>
+        <div class="meter">Loudness trim<span id="meter-match">0.0 dB</span></div>
+        <div class="meter">Limiter reduction<span id="meter-limiter">0.0 dB</span></div>
+        <div class="meter">Ceiling<span id="meter-ceiling">clean</span></div>
+      </div>
+    </section>
+  </main>
+  <script src="chrome-settings.js"></script>
+  <script type="module" src="bridge.js"></script>
+</body>
+</html>

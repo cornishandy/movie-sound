@@ -1,0 +1,156 @@
+#!/bin/bash
+# movie-audio on|off|status — Mac sound through Andy's Chrome DSP bridge (BlackHole 2ch), or straight to the iFi DAC.
+#   on      start the bridge's local server if needed (for 12 hours; an already-open bridge page keeps
+#           working after that), open or show the bridge page in Chrome, send Mac sound to BlackHole.
+#           If the page isn't running yet, click Start on it: Chrome won't play a page's sound until it's clicked.
+#   off     send Mac sound back to the iFi, close the bridge page, stop its server.
+#   status  what's on now.   is-on  prints yes or no (used by the Movie Sound app's on/off switch).
+# Usually run by double-clicking ~/Applications/Movie Sound.app, which also presses Start for you.
+# Test overrides: MOVIE_AUDIO_PORT, MOVIE_AUDIO_KEEP_ID, MOVIE_AUDIO_SAS, MOVIE_AUDIO_FOCUS=0, MOVIE_AUDIO_CHROME=0 (no Chrome
+# at all), MOVIE_AUDIO_BRIDGE_DIR.
+set -u
+PORT="${MOVIE_AUDIO_PORT:-8791}"
+KEEP_ID="${MOVIE_AUDIO_KEEP_ID:-movie-dsp-bridge}"
+SAS="${MOVIE_AUDIO_SAS:-/opt/homebrew/bin/SwitchAudioSource}"
+FOCUS="${MOVIE_AUDIO_FOCUS:-1}"
+USE_CHROME="${MOVIE_AUDIO_CHROME:-1}"
+# Andy's phone-page tool restarts the server if it ever exits ("keep"). Without it, the server just runs in the background.
+PP="${MOVIE_AUDIO_PHONE_PAGE:-$HOME/.claude/bin/phone-page}"
+NODE="${MOVIE_AUDIO_NODE:-$(command -v node || echo /opt/homebrew/bin/node)}"
+LOG_DIR="$HOME/Library/Logs/movie-sound"
+BRIDGE_DIR="${MOVIE_AUDIO_BRIDGE_DIR:-$HOME/Library/Application Support/movie-sound/bridge}"
+URL="http://127.0.0.1:$PORT/"
+BLACKHOLE="BlackHole 2ch"
+IFI="iFi Pro iDSD "   # the trailing space is part of the device's name
+
+server_up() { curl -s -o /dev/null -m 2 "$URL"; }
+chrome_running() { [ "$USE_CHROME" = 1 ] && [ "$(osascript -e 'application "Google Chrome" is running' 2>/dev/null)" = "true" ]; }
+
+# Prints the bridge tab's title (empty if there's no bridge tab). Never launches Chrome.
+bridge_tab_title() {
+  chrome_running || return 0
+  osascript - "$URL" <<'EOF' 2>/dev/null
+on run argv
+  tell application "Google Chrome"
+    repeat with w in windows
+      repeat with t in tabs of w
+        if URL of t starts with (item 1 of argv) then return title of t
+      end repeat
+    end repeat
+  end tell
+  return ""
+end run
+EOF
+}
+
+# Shows the bridge tab, or opens one. A bridge tab that isn't running (no ▶ in its title, or an error page) is
+# reloaded first, so its Start button has the keyboard focus. Prints the resulting title.
+show_bridge_tab() {
+  [ "$USE_CHROME" = 1 ] || return 0
+  osascript - "$URL" "$FOCUS" <<'EOF' 2>/dev/null
+on run argv
+  set u to item 1 of argv
+  set wantFocus to (item 2 of argv) is "1"
+  tell application "Google Chrome"
+    repeat with w in windows
+      set i to 0
+      repeat with t in tabs of w
+        set i to i + 1
+        if URL of t starts with u then
+          if title of t contains "▶" then return title of t
+          reload t
+          delay 1.5
+          if wantFocus then
+            set active tab index of w to i
+            if minimized of w then set minimized of w to false
+            set index of w to 1
+            activate
+          end if
+          return title of t
+        end if
+      end repeat
+    end repeat
+    if (count of windows) is 0 then make new window
+    tell window 1 to make new tab with properties {URL:u}
+    if wantFocus then
+      if minimized of window 1 then set minimized of window 1 to false
+      activate
+    end if
+    delay 1.5
+    return title of active tab of window 1
+  end tell
+end run
+EOF
+}
+
+close_bridge_tabs() {
+  chrome_running || return 0
+  osascript - "$URL" <<'EOF' >/dev/null 2>&1
+on run argv
+  tell application "Google Chrome"
+    repeat with w in windows
+      close (every tab of w whose URL starts with (item 1 of argv))
+    end repeat
+  end tell
+end run
+EOF
+}
+
+case "${1:-}" in
+  on)
+    # A server stopped by `off` takes up to ~20 s to exit; until then its keeper refuses a new one, so retry for 25 s.
+    deadline=$(( $(date +%s) + 25 ))
+    while [ "$(date +%s)" -lt "$deadline" ]; do
+      server_up && break
+      if [ -x "$PP" ]; then
+        "$PP" keep --id "$KEEP_ID" --until "$(date -v+12H '+%Y-%m-%d %H:%M')" --done-when false -- \
+          /usr/bin/env BRIDGE_PORT="$PORT" "$NODE" "$BRIDGE_DIR/server.mjs" >/dev/null 2>&1
+      else
+        mkdir -p "$LOG_DIR"
+        BRIDGE_PORT="$PORT" BRIDGE_EXIT_AFTER_HOURS=12 nohup "$NODE" "$BRIDGE_DIR/server.mjs" >>"$LOG_DIR/bridge.log" 2>&1 &
+      fi
+      for _ in $(seq 1 12); do server_up && break; sleep 0.25; done
+      if ! server_up; then
+        [ -z "${waited:-}" ] && echo "Waiting for the previous bridge server to finish stopping…" && waited=1
+        sleep 2
+      fi
+    done
+    if ! server_up; then
+      if [ -x "$PP" ]; then log="~/.local/share/phone-pages/keep/$KEEP_ID.log"; else log="~/Library/Logs/movie-sound/bridge.log"; fi
+      echo "The bridge server didn't start. Its log: $log"
+      exit 1
+    fi
+    title="$(show_bridge_tab)"
+    "$SAS" -t output -s "$BLACKHOLE" >/dev/null || { echo "Couldn't switch Mac sound to $BLACKHOLE."; exit 1; }
+    if [[ "$title" == *"▶"* ]]; then
+      echo "Movie audio ON: Mac sound goes through your DSP bridge, which is already running."
+    else
+      echo "Movie audio ON: Mac sound now goes to the bridge. Click Start on the \"Movie DSP bridge\" page in Chrome; you'll hear nothing until you do."
+    fi
+    ;;
+  off)
+    "$SAS" -t output -s "$IFI" >/dev/null || { echo "Couldn't switch Mac sound to the iFi."; exit 1; }
+    close_bridge_tabs
+    [ -x "$PP" ] && "$PP" keep --stop "$KEEP_ID" >/dev/null 2>&1
+    # Its keeper only notices the stop every 15 s, so end the bridge server (the listener on its port) now.
+    pids="$(lsof -ti "tcp:$PORT" -sTCP:LISTEN 2>/dev/null)"
+    [ -n "$pids" ] && kill $pids 2>/dev/null
+    echo "Movie audio OFF: Mac sound goes straight to the iFi; the bridge page is closed and its server stopped."
+    ;;
+  is-on)
+    if [ "$("$SAS" -c -t output)" = "$BLACKHOLE" ]; then echo yes; else echo no; fi
+    ;;
+  status)
+    out="$("$SAS" -c -t output)"
+    title="$(bridge_tab_title)"
+    if [ "$out" = "$BLACKHOLE" ]; then echo "Mac sound: through the DSP bridge ($out)"; else echo "Mac sound: $out (bridge not in use)"; fi
+    if server_up; then echo "Bridge server: running at $URL"; else echo "Bridge server: stopped"; fi
+    if [ -z "$title" ]; then echo "Bridge page: not open"
+    elif [[ "$title" == *"▶"* ]]; then echo "Bridge page: running"
+    else echo "Bridge page: open but not started (click Start), or opened before the running indicator was added"; fi
+    ;;
+  *)
+    echo "usage: movie-audio on|off|status|is-on"
+    exit 1
+    ;;
+esac

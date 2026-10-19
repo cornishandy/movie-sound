@@ -1,0 +1,64 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{margin:0;font-family:var(--font-sans);color:var(--foreground)}
+.wrap{display:flex;flex-direction:column;gap:22px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.tile .k{font-size:12px;color:var(--muted-foreground)}.tile .v{font-size:22px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}.tile .s{font-size:12px;color:var(--muted-foreground);margin-top:2px}
+h3{font-size:14px;margin:0 0 4px;font-weight:600}.sub{font-size:12px;color:var(--muted-foreground);margin:0 0 8px}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--muted-foreground);margin-bottom:6px}.sw{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+svg text{font-size:11px;fill:var(--muted-foreground)}
+.tip{position:absolute;pointer-events:none;background:var(--popover);color:var(--popover-foreground);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:12px;display:none;white-space:nowrap;font-variant-numeric:tabular-nums}
+.chart{position:relative}
+table{border-collapse:collapse;font-size:12px}td,th{padding:3px 10px 3px 0;text-align:left;font-variant-numeric:tabular-nums}th{color:var(--muted-foreground);font-weight:500}
+details{font-size:12px;color:var(--muted-foreground)}
+</style></head><body><div class="wrap">
+<div class="tiles">
+<div class="tile"><div class="k">Bass boost reaching the iFi</div><div class="v">+12.1 dB</div><div class="s">below 120 Hz (you set +13)</div></div>
+<div class="tile"><div class="k">Loudest output peak</div><div class="v">−0.6 dBFS</div><div class="s">0 clipped samples</div></div>
+<div class="tile"><div class="k">Limiter pulling down</div><div class="v">0 dB</div><div class="s">95% of the time; 1.6 dB at most</div></div>
+<div class="tile"><div class="k">Film’s own peaks</div><div class="v">−11 dBFS</div><div class="s">the headroom your boost uses</div></div>
+</div>
+<div><h3>Low end (below 120 Hz) through the scene</h3><p class="sub">As it arrives from AMC+ and as it leaves for the iFi, in dBFS, loudest moment in each second. Hover for values.</p>
+<div class="legend"><span><span class="sw" style="background:var(--chart-2)"></span>From AMC+ (before your settings)</span><span><span class="sw" style="background:var(--chart-1)"></span>To the iFi (after)</span></div>
+<div class="chart" id="c1"><svg id="s1" width="100%" height="230"></svg><div class="tip" id="t1"></div></div></div>
+<div><h3>How much each frequency band was raised</h3><p class="sub">Median change from before to after your settings, dB.</p>
+<div class="chart" id="c2"><svg id="s2" width="100%" height="200"></svg><div class="tip" id="t2"></div></div></div>
+<details><summary>Table view</summary><table id="tbl"><tr><th>Band</th><th>Range</th><th>Raised by</th></tr></table></details>
+</div>
+<script>
+const D={"pts":[{"t":1254.5,"i":-32.0,"o":-20.3,"l":0},{"t":1255.5,"i":-34.7,"o":-22.6,"l":0},{"t":1256.5,"i":-30.9,"o":-18.6,"l":0},{"t":1257.5,"i":-27.0,"o":-15.2,"l":0},{"t":1258.5,"i":-28.0,"o":-16.6,"l":0},{"t":1259.5,"i":-25.7,"o":-13.7,"l":0},{"t":1260.5,"i":-30.0,"o":-18.0,"l":0},{"t":1261.5,"i":-29.0,"o":-16.7,"l":0},{"t":1262.5,"i":-31.2,"o":-20.5,"l":0},{"t":1263.5,"i":-41.6,"o":-31.3,"l":0},{"t":1264.5,"i":-27.0,"o":-15.7,"l":0},{"t":1265.5,"i":-34.5,"o":-22.5,"l":0},{"t":1266.5,"i":-35.0,"o":-23.1,"l":0},{"t":1267.5,"i":-38.5,"o":-27.7,"l":0},{"t":1268.5,"i":-39.5,"o":-28.6,"l":0},{"t":1269.5,"i":-33.9,"o":-23.7,"l":0},{"t":1270.5,"i":-33.1,"o":-22.5,"l":0},{"t":1271.5,"i":-38.9,"o":-28.3,"l":0},{"t":1272.5,"i":-39.1,"o":-27.1,"l":0},{"t":1273.5,"i":-90,"o":-90,"l":0},{"t":1274.5,"i":-36.4,"o":-25.0,"l":0},{"t":1275.5,"i":-32.3,"o":-21.5,"l":0},{"t":1276.5,"i":-33.6,"o":-22.8,"l":0},{"t":1277.5,"i":-33.7,"o":-22.8,"l":0},{"t":1278.5,"i":-33.6,"o":-22.4,"l":0},{"t":1279.5,"i":-31.3,"o":-19.5,"l":0},{"t":1280.5,"i":-36.0,"o":-25.0,"l":0},{"t":1281.5,"i":-32.1,"o":-20.3,"l":0},{"t":1282.5,"i":-31.4,"o":-19.6,"l":0},{"t":1283.5,"i":-32.1,"o":-20.5,"l":0},{"t":1284.5,"i":-34.0,"o":-22.5,"l":0},{"t":1285.5,"i":-32.5,"o":-20.9,"l":0},{"t":1286.5,"i":-31.6,"o":-20.1,"l":0},{"t":1287.5,"i":-34.7,"o":-23.1,"l":0},{"t":1288.5,"i":-40.7,"o":-30.1,"l":0},{"t":1289.5,"i":-37.1,"o":-25.5,"l":0},{"t":1290.5,"i":-30.7,"o":-19.0,"l":0},{"t":1291.5,"i":-30.5,"o":-18.9,"l":0},{"t":1292.5,"i":-30.2,"o":-17.6,"l":0},{"t":1293.5,"i":-25.3,"o":-13.5,"l":0},{"t":1294.5,"i":-31.8,"o":-19.8,"l":0},{"t":1295.5,"i":-28.6,"o":-16.6,"l":0},{"t":1296.5,"i":-28.1,"o":-15.8,"l":0},{"t":1297.5,"i":-33.4,"o":-23.3,"l":0},{"t":1298.5,"i":-34.1,"o":-22.5,"l":0},{"t":1299.5,"i":-30.9,"o":-21.0,"l":0},{"t":1300.5,"i":-28.4,"o":-17.2,"l":0},{"t":1301.5,"i":-31.3,"o":-21.9,"l":0},{"t":1302.5,"i":-31.1,"o":-20.0,"l":0},{"t":1303.5,"i":-27.5,"o":-15.8,"l":0},{"t":1304.5,"i":-27.5,"o":-14.7,"l":0},{"t":1305.5,"i":-26.4,"o":-14.0,"l":0},{"t":1306.5,"i":-30.6,"o":-18.1,"l":0},{"t":1307.5,"i":-30.1,"o":-17.8,"l":0},{"t":1308.5,"i":-29.3,"o":-16.6,"l":0},{"t":1309.5,"i":-32.1,"o":-21.0,"l":0},{"t":1310.5,"i":-32.1,"o":-20.5,"l":0},{"t":1311.5,"i":-27.4,"o":-19.3,"l":0},{"t":1312.5,"i":-27.8,"o":-16.3,"l":0},{"t":1313.5,"i":-28.3,"o":-16.8,"l":0},{"t":1314.5,"i":-29.9,"o":-21.1,"l":0},{"t":1315.5,"i":-30.0,"o":-18.5,"l":0},{"t":1316.5,"i":-31.1,"o":-19.8,"l":0},{"t":1317.5,"i":-31.5,"o":-18.7,"l":0},{"t":1318.5,"i":-32.1,"o":-19.9,"l":0},{"t":1319.5,"i":-33.0,"o":-21.2,"l":0},{"t":1320.5,"i":-24.5,"o":-12.4,"l":0},{"t":1321.5,"i":-23.7,"o":-11.3,"l":0.7},{"t":1322.5,"i":-26.1,"o":-13.6,"l":0.1},{"t":1323.5,"i":-32.9,"o":-20.9,"l":0},{"t":1324.5,"i":-35.5,"o":-22.6,"l":0},{"t":1325.5,"i":-37.3,"o":-24.7,"l":0},{"t":1326.5,"i":-27.2,"o":-14.0,"l":0},{"t":1327.5,"i":-22.6,"o":-10.5,"l":1.3},{"t":1328.5,"i":-22.9,"o":-10.7,"l":0.8},{"t":1329.5,"i":-26.5,"o":-13.4,"l":0},{"t":1330.5,"i":-26.8,"o":-13.7,"l":0},{"t":1331.5,"i":-29.7,"o":-16.6,"l":0},{"t":1332.5,"i":-29.5,"o":-16.3,"l":0},{"t":1333.5,"i":-29.6,"o":-16.9,"l":0},{"t":1334.5,"i":-22.5,"o":-10.3,"l":1.2},{"t":1335.5,"i":-25.7,"o":-12.5,"l":0},{"t":1336.5,"i":-23.9,"o":-10.8,"l":0},{"t":1337.5,"i":-31.4,"o":-18.3,"l":0},{"t":1338.5,"i":-31.1,"o":-17.6,"l":0},{"t":1339.5,"i":-33.9,"o":-20.9,"l":0},{"t":1340.5,"i":-32.4,"o":-19.6,"l":0},{"t":1341.5,"i":-34.1,"o":-21.0,"l":0},{"t":1342.5,"i":-32.8,"o":-19.2,"l":0},{"t":1343.5,"i":-34.6,"o":-20.9,"l":0},{"t":1344.5,"i":-37.1,"o":-24.1,"l":0},{"t":1345.5,"i":-40.0,"o":-27.0,"l":0},{"t":1346.5,"i":-37.5,"o":-24.7,"l":0},{"t":1347.5,"i":-33.9,"o":-19.9,"l":0},{"t":1348.5,"i":-36.9,"o":-23.3,"l":0},{"t":1349.5,"i":-37.1,"o":-23.8,"l":0},{"t":1350.5,"i":-40.2,"o":-27.7,"l":0},{"t":1351.5,"i":-38.8,"o":-25.2,"l":0},{"t":1352.5,"i":-37.9,"o":-24.8,"l":0},{"t":1353.5,"i":-34.8,"o":-21.7,"l":0},{"t":1354.5,"i":-38.1,"o":-24.6,"l":0},{"t":1355.5,"i":-40.1,"o":-26.4,"l":0},{"t":1356.5,"i":-36.6,"o":-22.8,"l":0},{"t":1357.5,"i":-29.5,"o":-17.2,"l":0},{"t":1358.5,"i":-29.9,"o":-17.6,"l":0},{"t":1359.5,"i":-29.6,"o":-16.4,"l":0},{"t":1360.5,"i":-32.6,"o":-19.6,"l":0},{"t":1361.5,"i":-30.2,"o":-19.6,"l":0},{"t":1362.5,"i":-30.4,"o":-17.3,"l":0},{"t":1363.5,"i":-29.0,"o":-16.1,"l":0},{"t":1364.5,"i":-31.0,"o":-18.8,"l":0},{"t":1365.5,"i":-28.3,"o":-16.0,"l":0},{"t":1366.5,"i":-30.6,"o":-17.5,"l":0},{"t":1367.5,"i":-35.7,"o":-22.2,"l":0},{"t":1368.5,"i":-35.4,"o":-23.0,"l":0},{"t":1369.5,"i":-33.0,"o":-20.0,"l":0},{"t":1370.5,"i":-34.5,"o":-21.8,"l":0},{"t":1371.5,"i":-34.9,"o":-23.7,"l":0},{"t":1372.5,"i":-34.0,"o":-21.6,"l":0},{"t":1373.5,"i":-33.9,"o":-21.0,"l":0},{"t":1374.5,"i":-32.8,"o":-20.3,"l":0},{"t":1375.5,"i":-30.9,"o":-17.3,"l":0},{"t":1376.5,"i":-33.9,"o":-21.1,"l":0},{"t":1377.5,"i":-34.6,"o":-20.8,"l":0},{"t":1378.5,"i":-32.5,"o":-18.6,"l":0},{"t":1379.5,"i":-29.7,"o":-16.4,"l":0},{"t":1380.5,"i":-28.8,"o":-15.5,"l":0},{"t":1381.5,"i":-27.4,"o":-14.0,"l":0.2},{"t":1382.5,"i":-29.0,"o":-15.6,"l":0.1},{"t":1383.5,"i":-25.9,"o":-13.3,"l":1.2},{"t":1384.5,"i":-31.6,"o":-18.8,"l":0},{"t":1385.5,"i":-36.6,"o":-24.2,"l":0},{"t":1386.5,"i":-40.3,"o":-27.4,"l":0},{"t":1387.5,"i":-42.0,"o":-28.6,"l":0},{"t":1388.5,"i":-51.7,"o":-38.3,"l":0},{"t":1389.5,"i":-55.7,"o":-41.4,"l":0},{"t":1390.5,"i":-60.3,"o":-47.3,"l":0},{"t":1391.5,"i":-65.5,"o":-52.8,"l":0},{"t":1392.5,"i":-71.1,"o":-58.0,"l":0}],"bands":{"sub":12.8,"bass":11.4,"lowMid":5.4,"mid":4.2,"presence":1.7,"air":0.2}};
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt=t=>Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0');
+function line(){
+ const svg=document.getElementById('s1'),W=svg.clientWidth,H=230,L=40,R=8,T=8,B=24;
+ const ts=D.pts.map(p=>p.t),t0=ts[0],t1=ts[ts.length-1];
+ const lo=-60,hi=0,x=t=>L+(t-t0)/(t1-t0)*(W-L-R),y=v=>T+(hi-Math.max(lo,Math.min(hi,v)))/(hi-lo)*(H-T-B);
+ let g='';for(let v=-60;v<=0;v+=15){g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="${css('--border')}" stroke-width="1"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v}</text>`}
+ for(let t=Math.ceil(t0/30)*30;t<=t1;t+=30){g+=`<text x="${x(t)}" y="${H-6}" text-anchor="middle">${fmt(t)}</text>`}
+ const path=k=>D.pts.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(1)+','+y(p[k]).toFixed(1)).join('');
+ g+=`<path d="${path('i')}" fill="none" stroke="${css('--chart-2')}" stroke-width="2" stroke-linejoin="round"/>`;
+ g+=`<path d="${path('o')}" fill="none" stroke="${css('--chart-1')}" stroke-width="2" stroke-linejoin="round"/>`;
+ g+=`<line id="xh" y1="${T}" y2="${H-B}" stroke="${css('--muted-foreground')}" stroke-width="1" opacity="0"/>`;
+ svg.innerHTML=g;
+ const tip=document.getElementById('t1'),xh=svg.querySelector('#xh');
+ svg.onmousemove=e=>{const r=svg.getBoundingClientRect(),mx=e.clientX-r.left;const t=t0+(mx-L)/(W-L-R)*(t1-t0);let best=D.pts[0];for(const p of D.pts)if(Math.abs(p.t-t)<Math.abs(best.t-t))best=p;
+  xh.setAttribute('x1',x(best.t));xh.setAttribute('x2',x(best.t));xh.setAttribute('opacity',.5);
+  tip.style.display='block';tip.innerHTML=`<b>${fmt(best.t)}</b><br>From AMC+: ${best.i<=-90?'silent':best.i.toFixed(1)+' dB'}<br>To the iFi: ${best.o<=-90?'silent':best.o.toFixed(1)+' dB'}<br>Limiter: ${best.l.toFixed(1)} dB`;
+  tip.style.left=Math.min(mx+12,W-150)+'px';tip.style.top='10px'};
+ svg.onmouseleave=()=>{tip.style.display='none';xh.setAttribute('opacity',0)};
+}
+function bars(){
+ const names={sub:['Deep sub','20–60 Hz'],bass:['Bass','60–120 Hz'],lowMid:['Low mids','120–500 Hz'],mid:['Mids','500 Hz–2 kHz'],presence:['Presence','2–6 kHz'],air:['Air','6–20 kHz']};
+ const svg=document.getElementById('s2'),W=svg.clientWidth,H=200,L=8,R=8,T=18,B=34,keys=Object.keys(D.bands),n=keys.length,bw=(W-L-R)/n,max=14;
+ const y=v=>T+(1-v/max)*(H-T-B);let g=`<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="${css('--border')}"/>`;
+ keys.forEach((k,i)=>{const v=D.bands[k],x0=L+i*bw+bw*0.2,w=bw*0.6,top=y(Math.max(0,v)),h=y(0)-top;
+  g+=`<path data-k="${k}" d="M${x0},${y(0)} V${top+4} q0,-4 4,-4 H${x0+w-4} q4,0 4,4 V${y(0)} Z" fill="${css('--chart-1')}"/>`;
+  g+=`<text x="${x0+w/2}" y="${top-5}" text-anchor="middle" style="fill:${css('--foreground')}">+${v.toFixed(1)}</text>`;
+  g+=`<text x="${x0+w/2}" y="${H-18}" text-anchor="middle">${names[k][0]}</text><text x="${x0+w/2}" y="${H-5}" text-anchor="middle">${names[k][1]}</text>`;
+  document.getElementById('tbl').insertAdjacentHTML('beforeend',`<tr><td>${names[k][0]}</td><td>${names[k][1]}</td><td>+${v.toFixed(1)} dB</td></tr>`)});
+ svg.innerHTML=g;
+ const tip=document.getElementById('t2');
+ svg.querySelectorAll('path[data-k]').forEach(p=>{p.onmouseenter=e=>{const k=p.dataset.k;tip.style.display='block';tip.innerHTML=`${names[k][0]} (${names[k][1]}): +${D.bands[k].toFixed(1)} dB`;const r=svg.getBoundingClientRect(),b=p.getBoundingClientRect();tip.style.left=Math.min(b.left-r.left,W-200)+'px';tip.style.top='0px'};p.onmouseleave=()=>tip.style.display='none'});
+}
+line();bars();
+</script></body></html>

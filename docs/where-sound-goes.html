@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where your sound goes · Movie Sound</title>
+<style>
+  :root{
+    --amber:#c98a2e; --bg:#faf7f2; --fg:#24201b; --muted:#6f665c; --border:#e2d9cc; --card:#ffffff;
+    --font:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --amber:#e0a04a; --bg:#1d1a17; --fg:#eee6db; --muted:#a59a8c; --border:#3a342d; --card:#26221e; }
+  }
+  body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--font)}
+  main{max-width:760px;margin:0 auto;padding:28px 24px 32px}
+  h1{font-size:20px;font-weight:600;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 20px;font-size:14px}
+  .group{margin:0 0 22px}
+  .gl{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 8px;display:flex;gap:8px;align-items:center}
+  .gl::after{content:"";flex:1;height:1px;background:var(--border)}
+  .path{display:grid;grid-template-columns:1fr auto;gap:4px 14px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--border)}
+  .path:last-child{border-bottom:0}
+  .chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+  .n{border:1px solid var(--border);background:var(--card);border-radius:999px;padding:3px 11px;font-size:13.5px;white-space:nowrap}
+  .n.fx{border-color:color-mix(in srgb,var(--amber) 55%,var(--border));background:color-mix(in srgb,var(--amber) 15%,var(--card))}
+  .n.src{font-weight:600}
+  .a{color:var(--muted);font-size:13px}
+  .v{font-size:13px;color:var(--muted);text-align:right;white-space:nowrap}
+  .v.twice{color:var(--amber);font-weight:600}
+  .path.warn{background:color-mix(in srgb,var(--amber) 8%,transparent);border-radius:8px;padding:9px 10px;margin:4px -10px;border-bottom:0}
+  ul{margin:8px 0 0;padding-left:20px}
+  li{margin:3px 0;font-size:14px}
+  .note{font-size:13.5px;color:var(--muted);margin:16px 0 0;border-top:1px solid var(--border);padding-top:12px}
+  code{font-size:12.5px}
+  a{color:inherit;text-decoration-color:var(--amber);text-underline-offset:2px}
+  @media (max-width:600px){.path{grid-template-columns:1fr}.v{text-align:left}.n{white-space:normal}}
+</style></head>
+<body><main>
+<h1>Where your sound goes</h1>
+<p class="sub">Movie Sound sits between your browser and your DAC (here an iFi Pro iDSD). Shaded steps change the sound.</p>
+
+<div class="group">
+  <div class="gl">Movie Sound on (the Mac's output is BlackHole)</div>
+  <div class="path"><div class="chain"><span class="n src">Safari</span><span class="a">→</span><span class="n">Mac output: BlackHole, 2 channels</span><span class="a">→</span><span class="n fx">Movie Sound: your EQ preset, leveler, limiter</span><span class="a">→</span><span class="n">iFi</span></div><div class="v">processed once</div></div>
+  <div class="path"><div class="chain"><span class="n src">Chrome, Tidal extension's EQ off for that tab</span><span class="a">→</span><span class="n">BlackHole</span><span class="a">→</span><span class="n fx">Movie Sound</span><span class="a">→</span><span class="n">iFi</span></div><div class="v">processed once, same as Safari</div></div>
+  <div class="path warn"><div class="chain"><span class="n src">Chrome, Tidal extension's EQ on</span><span class="a">→</span><span class="n fx">extension's EQ</span><span class="a">→</span><span class="n">BlackHole</span><span class="a">→</span><span class="n fx">Movie Sound</span><span class="a">→</span><span class="n">iFi</span></div><div class="v twice">processed twice: bass +13 dB becomes about +26 dB</div></div>
+</div>
+
+<div class="group">
+  <div class="gl">Movie Sound off (the Mac's output is the iFi)</div>
+  <div class="path"><div class="chain"><span class="n src">Safari</span><span class="a">→</span><span class="n">iFi</span></div><div class="v">untouched</div></div>
+  <div class="path"><div class="chain"><span class="n src">Chrome, Tidal extension's EQ on</span><span class="a">→</span><span class="n fx">extension's EQ</span><span class="a">→</span><span class="n">iFi</span></div><div class="v">processed once</div></div>
+</div>
+
+<div class="group">
+  <div class="gl">Where Movie Sound gets its EQ settings</div>
+  <div class="path"><div class="chain"><span class="n src">Tidal extension: presets and sliders</span><span class="a">→</span><span class="n">saved in Chrome</span><span class="a">→</span><span class="n">its link script, on the Movie Sound page only</span><span class="a">→</span><span class="n fx">Movie Sound</span></div><div class="v">follows live</div></div>
+  <ul>
+    <li>Pick a preset or move a slider in the extension and Movie Sound changes with it, whether or not you save the preset.</li>
+    <li>The extension's <b>AUDIO EQ</b> on/off switch isn't followed. Turning it off to avoid the double processing above leaves Movie Sound on, so the film is still processed once.</li>
+    <li>To pick a preset on the Movie Sound page itself, untick <b>Follow Chrome</b> there. Tick it again to go back to following.</li>
+    <li>Pitch stays off, as the extension does for video, so the picture and sound stay in sync.</li>
+    <li>Without the extension (or with a version before 1.5.7), Movie Sound uses the presets saved in <code>bridge/chrome-settings.js</code>.</li>
+  </ul>
+</div>
+
+<p class="note">BlackHole has 2 channels, so the browser folds 5.1 or Atmos down to stereo before Movie Sound hears it. The <a href="https://github.com/cornishandy/stream-quality-hud">Stream Quality HUD</a> isn't on any of these paths: it only reads facts about the video, so turning it on or off changes nothing you hear.</p>
+</main></body></html>
