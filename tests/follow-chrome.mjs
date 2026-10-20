@@ -175,7 +175,7 @@ test('Sol B2: malformed or out-of-range settings are refused whole, and the soun
     { currentParams: params({ gain: 'loud' }) },
     { currentParams: params({ semitones: 99 }) },
     { currentParams: params({ hpf: 10 }) },
-    { currentParams: params({ bass: 15 }) },
+    { currentParams: params({ bass: 28.5 }) },
     { currentParams: params({ stageBypass: { bass: 'yes' } }) },
     { currentParams: params({ autoBalance: 'no' }) },
     { currentParams: null },
@@ -193,6 +193,34 @@ test('Sol B2: malformed or out-of-range settings are refused whole, and the soun
   page.deliver(settings({ currentParams: params({ bass: 12 }) }));
   assert.equal(page.bass(), 12);
   assert.doesNotMatch(page.status(), /can’t use/, 'the warning stays after a good message');
+});
+
+test('1.1.1: the doubled ranges (extension 1.5.8) are followed to their exact ends, and one step past them is refused', async () => {
+  const page = makePage();
+  page.deliver(settings());
+  await page.start();
+  // Every combination of the new ends and the values just inside them reaches the graph unchanged.
+  const good = [];
+  for (const bass of [0, 14.5, 15, 27.5, 28]) for (const mid of [-12, -11.5, 6.5, 11.5, 12]) for (const high of [-12, 12]) good.push({ bass, mid, high });
+  for (const g of good) {
+    page.deliver(settings({ currentParams: params(g), presets: { 'max-max-0': params(), 'Big': params(g) }, currentPreset: 'Big' }));
+    const p = page.state().params;
+    assert.deepEqual([p.bass, p.mid, p.high], [g.bass, g.mid, g.high], 'not followed: ' + JSON.stringify(g));
+    assert.equal(page.bass(), g.bass, 'graph bass for ' + JSON.stringify(g));
+    assert.equal(page.graph().midNode.gain.value, g.mid, 'graph mid for ' + JSON.stringify(g));
+    assert.equal(page.graph().highNode.gain.value, g.high, 'graph high for ' + JSON.stringify(g));
+    assert.doesNotMatch(page.status(), /can’t use/, 'refused ' + JSON.stringify(g));
+  }
+  // An old preset keeps its own numbers: 14 / 6 / 0 stays 14 / 6 / 0.
+  page.deliver(settings({ currentParams: params({ bass: 14, mid: 6, high: 0 }) }));
+  assert.deepEqual([page.state().params.bass, page.state().params.mid, page.state().params.high], [14, 6, 0]);
+  const before = JSON.stringify(page.state().params);
+  const bad = [{ bass: -0.01 }, { bass: 28.01 }, { mid: 12.01 }, { mid: -12.01 }, { high: 12.01 }, { high: -12.01 }, { bass: Infinity }, { mid: '12' }];
+  for (const over of bad) {
+    page.deliverRaw(settings({ currentParams: params(over) }));
+    assert.equal(JSON.stringify(page.state().params), before, 'applied ' + JSON.stringify(over));
+    assert.match(page.status(), /can’t use/, 'status for ' + JSON.stringify(over));
+  }
 });
 
 test('Sol B3: live changes glide (30 ms EQ, 20 ms routing); setup is immediate', async () => {

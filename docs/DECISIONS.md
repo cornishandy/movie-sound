@@ -2,6 +2,14 @@
 
 Why Movie Sound works the way it does. Newest first.
 
+## Bigger EQ ranges, matching the extension's 1.5.8 (19 Oct 2026)
+
+The extension's Bass slider now goes to +28 dB and Mid and High to −12 / +12 dB (they were +14 and ±6), at Andy's request ("I'd like to increase them to double what they are, if possible"; cuts "±12 dB"). Movie Sound 1.1.1 accepts the same ends in `CHROME_PARAM_RANGES` (`bridge/bridge.js`). Without this it would have refused every setting past the old ends and kept playing the previous sound.
+
+- **Refused, never clamped, as before.** Anything outside the new ranges, or not a finite number, is refused whole: the sound stays and the page says it can't use the settings. `tests/follow-chrome.mjs` checks every new end and one step past each.
+- **Nothing else changed.** The processing is the same (the default chain and every switch), presets keep their numbers, and the saved copy in `bridge/chrome-settings.js` is untouched.
+- **Release together.** Install Movie Sound 1.1.1 with or before extension 1.5.8; an older Movie Sound refuses the new big settings.
+
 ## Following the Tidal extension's EQ live (19 Oct 2026)
 
 Before this, the bridge used a saved copy of the extension's presets (`bridge/chrome-settings.js`, written by `tools/import-chrome-audio-settings.mjs`). It always started on the same preset, and it never saw later edits. The goal was to have Movie Sound play whatever the extension is set to, live, without adding much that could break ("I don't want to introduce exponential complexity to this, for resilience and reliability purposes").
