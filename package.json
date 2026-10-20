@@ -1,6 +1,6 @@
 {
   "name": "movie-sound",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "private": true,
   "description": "Your Tidal-extension EQ for films in Safari: BlackHole into a local Chrome page that runs the EQ, then out to your DAC.",
   "author": "cornishandy",

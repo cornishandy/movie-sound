@@ -2,6 +2,10 @@
 
 Why Movie Sound works the way it does. Newest first.
 
+## EQ ranges doubled again, matching extension 1.5.9 (20 Oct 2026)
+
+Andy asked to "increase range again by 2x for low/mid/high" (4:17 AM). Movie Sound 1.1.2 now accepts Bass 0 to +56 dB and Mid and High −24 to +24 dB, matching extension 1.5.9. `tests/follow-chrome.mjs` checks every new end, refusal one 0.5 dB step past each, and acceptance of the old +28 / ±12 values. Out-of-range or non-finite settings are still refused whole, never clamped. Processing, switches, defaults, presets and the saved settings copy are unchanged. Install 1.1.2 with or before extension 1.5.9 so the new ends can be followed.
+
 ## Bigger EQ ranges, matching the extension's 1.5.8 (19 Oct 2026)
 
 The extension's Bass slider now goes to +28 dB and Mid and High to −12 / +12 dB (they were +14 and ±6), at Andy's request ("I'd like to increase them to double what they are, if possible"; cuts "±12 dB"). Movie Sound 1.1.1 accepts the same ends in `CHROME_PARAM_RANGES` (`bridge/bridge.js`). Without this it would have refused every setting past the old ends and kept playing the previous sound.

@@ -309,9 +309,9 @@ export function presetParams(name) {
 
 // ---- Following the Tidal extension's EQ live (its movie-sound-link.js posts to this page) ----
 
-// The extension's slider ranges (popup.html; Bass 0..28 and Mid/High -12..12 since extension 1.5.8 / Movie Sound 1.1.1).
+// The extension's slider ranges (popup.html; Bass 0..56 and Mid/High -24..24 since extension 1.5.9 / Movie Sound 1.1.2).
 // A value outside them is refused, never clamped.
-export const CHROME_PARAM_RANGES = { bass: [0, 28], hpf: [20, 200], mid: [-12, 12], high: [-12, 12], gain: [0.5, 2.5], semitones: [-12, 12] };
+export const CHROME_PARAM_RANGES = { bass: [0, 56], hpf: [20, 200], mid: [-24, 24], high: [-24, 24], gain: [0.5, 2.5], semitones: [-12, 12] };
 const DYNAMICS_CHOICES = { leveler: ['full', 'slow', 'bass'], limiter: ['fast', 'lookahead'], ceiling: ['clean', 'warm'] };
 const isPlainObject = (x) => !!x && typeof x === 'object' && !Array.isArray(x);
 
